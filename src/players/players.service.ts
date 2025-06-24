@@ -17,12 +17,10 @@ export class PlayersService {
         
         const{ email } = createPlayerDto;
 
-        //const existingPlayer = this.players.find(player => player.email === email);
-
         const existingPlayer = await this.playerModel.findOne({email}).exec();
 
         if (existingPlayer) {
-            await this.refreshPlayer(existingPlayer, createPlayerDto);
+            await this.refresh(createPlayerDto);
         }
         else {
             this.logger.log(`Creating new player with email ${email}`);
@@ -32,34 +30,35 @@ export class PlayersService {
 
     async getAllPlayers(): Promise<Player[]> {
         this.logger.log('Fetching all players');
-        return await this.players;
+        return await this.playerModel.find().exec();
     }
+
     async getAllPlayersByEmail(email: string): Promise<Player[]> {
+
         this.logger.log('Fetching all players');
+
         const existingPlayer = this.players.find(player => player.email === email);
+
         if (!existingPlayer) {
             throw new NotFoundException('Player not found');
         }
         return [existingPlayer];
     }
 
-    private create(createPlayerDto: CreatePlayerDto): void {
-        const {name, phone, email } = createPlayerDto;
-        const player: Player = {
-            name,
-            phone,
-            email,
-            rank: 'Unranked',
-            pfpUrl: 'https://example.com/default-pfp.png',
-            position: this.players.length + 1, // Assign position based on current length of players array    
-            
-        };
-        this.logger.log('Created new player', JSON.stringify(player));
-        this.players.push(player);
+    private async delete(email: string): Promise<any> {
+        return await this.playerModel.findOneAndDelete({email}).exec();
     }
 
-    private refreshPlayer(existingPlayerplayer: Player, createPlayerDto): void {
-        const { name } = createPlayerDto;
-        existingPlayerplayer.name = name;
+    private async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
+        const createdPlayer = new this.playerModel(createPlayerDto);
+        return await createdPlayer.save();
+    }
+
+    private async refresh(createPlayerDto): Promise<Player | null> {
+        return await this.playerModel.findOneAndUpdate(
+            {email: createPlayerDto.email}, 
+            {$set: createPlayerDto},
+            { new: true }
+        ).exec();
     }
 }
