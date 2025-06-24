@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { playersModule } from './players/players.module';
+import { MongooseModule } from '@nestjs/mongoose';
+
 
 @Module({
-  imports: [playersModule],
+  imports: [
+    MongooseModule.forRoot('mongodb://mongo:mongo@localhost:27017/nestjs-players?authSource=admin&directConnection=true'),
+    playersModule],
   controllers: [],
-  providers: [],
+  providers: []
 })
 export class AppModule {}
