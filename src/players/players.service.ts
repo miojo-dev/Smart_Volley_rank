@@ -17,7 +17,7 @@ export class PlayersService {
         
         const{ email } = createPlayerDto;
 
-        const existingPlayer = await this.playerModel.findOne({email}).exec();
+        const existingPlayer = (await this.playerModel.findOne({email}).exec());
 
         if (existingPlayer) {
             await this.refresh(createPlayerDto);
@@ -35,9 +35,11 @@ export class PlayersService {
 
     async getAllPlayersByEmail(email: string): Promise<Player[]> {
 
-        this.logger.log('Fetching all players');
+        this.logger.log('Fetching all players by Email');
 
-        const existingPlayer = this.players.find(player => player.email === email);
+        //const existingPlayer = this.players.find(player => player.email === email);
+
+        const existingPlayer = await this.playerModel.findOne({email}).exec();
 
         if (!existingPlayer) {
             throw new NotFoundException('Player not found');

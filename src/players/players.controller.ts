@@ -22,7 +22,7 @@ export class playersController {
 
     @Get()
     async getPlayers(@Query('email') email: string): Promise<Player[] | Player> {
-        if (email) {
+        if (email > '@') {
             return await this.playersService.getAllPlayersByEmail(email);
         } else {
             return await this.playersService.getAllPlayers();
